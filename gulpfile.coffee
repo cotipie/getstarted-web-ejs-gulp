@@ -19,6 +19,8 @@ gulp.task 'bower', ->
 gulp.task 'fonts', ->
   gulp.src 'lib/fontawesome-webfont.*'
     .pipe (gulp.dest 'dist/fonts')
+
+gulp.task 'csslib', ->    
   gulp.src 'lib/*.css'
     .pipe (gulp.dest 'dist/css')
 
@@ -65,13 +67,13 @@ gulp.task 'server', ->
   })
 
 gulp.task 'getstart', (cb)->
-  runSequence 'bower',['fonts','jslib'],'default',cb
+  runSequence 'bower',['fonts','csslib','jslib'],'default',cb
 
 gulp.task 'default', ->
 	gulp.start 'build:sass','build:ejs','build:js','imagemin'
 
 gulp.task 'release', (cb)->
-  runSequence 'releaseClean','bower',['fonts','jslib'],'libClean','default',cb 
+  runSequence 'releaseClean','bower',['fonts','csslib','jslib'],'libClean','default',cb 
 
 gulp.task 'watch',->
 	gulp.start 'server'
