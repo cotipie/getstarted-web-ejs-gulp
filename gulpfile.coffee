@@ -10,7 +10,9 @@ ejs = require 'gulp-ejs'
 browserSync = require 'browser-sync'
 imagemin = require 'gulp-imagemin'
 plumber = require 'gulp-plumber'
- 
+filter = require 'gulp-filter'
+notify = require 'gulp-notify'
+
 gulp.task 'bower', ->
   bower()
     .pipe flatten()
@@ -20,7 +22,7 @@ gulp.task 'fonts', ->
   gulp.src 'lib/fontawesome-webfont.*'
     .pipe (gulp.dest 'dist/fonts')
 
-gulp.task 'csslib', ->    
+gulp.task 'csslib', ->
   gulp.src 'lib/*.css'
     .pipe (gulp.dest 'dist/css')
 
@@ -37,19 +39,23 @@ gulp.task 'releaseClean', (cb)->
 
 gulp.task 'build:js',->
   gulp.src 'js/*.js'
+    .pipe plumber({errorHandler: notify.onError('<%= error.message %>')})
     .pipe uglify({preserveComments:'some'})
     .pipe (gulp.dest 'dist/js')
 
 gulp.task 'build:sass',->
   gulp.src 'sass/**/*.scss'
-    .pipe plumber()
-    .pipe sass()
+    .pipe plumber({errorHandler: notify.onError('<%= error.message %>')})
+    .pipe sass({
+      outputStyle: 'compressed'
+      })
+    .pipe filter('**/*.css')
     .pipe autoprefixer('last 2 version')
     .pipe (gulp.dest 'dist/css')
 
 gulp.task 'build:ejs', ->
   gulp.src ['ejs/*.ejs','!ejs/_*.ejs']
-    .pipe plumber()
+    .pipe plumber({errorHandler: notify.onError('<%= error.message %>')})
     .pipe ejs()
     .pipe (gulp.dest 'dist')
 
@@ -73,7 +79,7 @@ gulp.task 'default', ->
 	gulp.start 'build:sass','build:ejs','build:js','imagemin'
 
 gulp.task 'release', (cb)->
-  runSequence 'releaseClean','bower',['fonts','csslib','jslib'],'libClean','default',cb 
+  runSequence 'releaseClean','bower',['fonts','csslib','jslib'],'libClean','default',cb
 
 gulp.task 'watch',->
 	gulp.start 'server'
